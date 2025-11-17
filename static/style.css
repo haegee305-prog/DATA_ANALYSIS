@@ -1,0 +1,410 @@
+/* InBody CI 색상 */
+:root {
+    --inbody-red: #971B2F;
+    --inbody-black: #101820;
+    --inbody-white: #FFFFFF;
+    --inbody-gold: #FFD700;
+    --inbody-red-dark: #7A1525;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+    background-color: var(--inbody-white);
+    color: var(--inbody-black);
+    line-height: 1.6;
+    padding: 10px;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding-bottom: 20px;
+}
+
+/* 헤더 */
+.header {
+    background: linear-gradient(135deg, var(--inbody-red) 0%, var(--inbody-red-dark) 100%);
+    color: var(--inbody-white);
+    padding: 25px 20px;
+    text-align: center;
+    border-radius: 10px 10px 0 0;
+    margin-bottom: 15px;
+}
+
+.header h1 {
+    font-size: 22px;
+    font-weight: bold;
+    line-height: 1.4;
+}
+
+/* 상태 섹션 */
+.status-section {
+    margin-bottom: 15px;
+}
+
+.status-card {
+    background: var(--inbody-red-dark);
+    color: var(--inbody-white);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.status-label {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 10px;
+}
+
+.status-value {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.status-progress {
+    margin-bottom: 10px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: rgba(255,255,255,0.2);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--inbody-gold) 0%, #FFA500 100%);
+    transition: width 0.3s ease;
+    border-radius: 10px;
+}
+
+.progress-text {
+    font-size: 12px;
+    text-align: right;
+    opacity: 0.9;
+}
+
+.status-info {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-top: 10px;
+}
+
+/* 예측 섹션 */
+.prediction-section {
+    margin-bottom: 15px;
+}
+
+.prediction-card {
+    background: var(--inbody-white);
+    border: 2px solid var(--inbody-red);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.prediction-label {
+    font-size: 14px;
+    color: var(--inbody-red);
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.prediction-value {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--inbody-red);
+}
+
+/* 입력 섹션 */
+.input-section {
+    margin-bottom: 15px;
+}
+
+.input-card {
+    background: var(--inbody-white);
+    border: 1px solid #e0e0e0;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.input-card h2 {
+    font-size: 18px;
+    color: var(--inbody-red);
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.input-field {
+    flex: 1;
+    padding: 12px 15px;
+    font-size: 16px;
+    border: 2px solid var(--inbody-red);
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.input-field:focus {
+    border-color: var(--inbody-red-dark);
+}
+
+.hint-text {
+    font-size: 12px;
+    color: #666;
+    text-align: center;
+}
+
+/* 버튼 */
+.btn {
+    padding: 12px 25px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+}
+
+.btn-primary {
+    background-color: var(--inbody-red);
+    color: var(--inbody-white);
+}
+
+.btn-primary:hover {
+    background-color: var(--inbody-red-dark);
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+.btn-secondary {
+    background-color: var(--inbody-black);
+    color: var(--inbody-white);
+    width: 100%;
+    padding: 15px;
+    font-size: 18px;
+}
+
+.btn-secondary:hover {
+    background-color: #1a252f;
+}
+
+.btn-secondary:active {
+    transform: scale(0.98);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* 액션 섹션 */
+.action-section {
+    margin-bottom: 20px;
+}
+
+.status-message {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 14px;
+    display: none;
+}
+
+.status-message.success {
+    background-color: #d4edda;
+    color: #155724;
+    display: block;
+}
+
+.status-message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    display: block;
+}
+
+.status-message.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    display: block;
+}
+
+/* 결과 섹션 */
+.results-section {
+    margin-top: 20px;
+}
+
+.results-card {
+    background: var(--inbody-white);
+    border: 1px solid #e0e0e0;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.results-card h2 {
+    font-size: 20px;
+    color: var(--inbody-red);
+    margin-bottom: 20px;
+    text-align: center;
+    border-bottom: 2px solid var(--inbody-red);
+    padding-bottom: 10px;
+}
+
+.results-card h3 {
+    font-size: 16px;
+    color: var(--inbody-red);
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+/* 테이블 */
+.table-container {
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+table thead {
+    background-color: var(--inbody-red);
+    color: var(--inbody-white);
+}
+
+table th {
+    padding: 10px 5px;
+    text-align: center;
+    font-weight: bold;
+}
+
+table td {
+    padding: 8px 5px;
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+table tbody tr:hover {
+    background-color: #f5f5f5;
+}
+
+.note {
+    font-size: 12px;
+    color: #666;
+    margin-top: 10px;
+    font-style: italic;
+}
+
+/* 정보 박스 */
+.info-box {
+    background-color: #f9f9f9;
+    border-left: 4px solid var(--inbody-red);
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+}
+
+.info-box p {
+    margin: 8px 0;
+    font-size: 14px;
+}
+
+.info-box strong {
+    color: var(--inbody-red);
+}
+
+.time-period {
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: var(--inbody-white);
+    border-radius: 5px;
+}
+
+.time-period strong {
+    color: var(--inbody-red);
+    display: block;
+    margin-bottom: 5px;
+}
+
+/* 최종 예측 */
+.final-prediction {
+    margin-top: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--inbody-red) 0%, var(--inbody-red-dark) 100%);
+    border-radius: 10px;
+    text-align: center;
+}
+
+.final-prediction-content h2 {
+    color: var(--inbody-white);
+    font-size: 18px;
+    margin-bottom: 15px;
+    border: none;
+}
+
+.final-time {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--inbody-gold);
+    margin-bottom: 10px;
+}
+
+.final-days {
+    font-size: 16px;
+    color: var(--inbody-white);
+    opacity: 0.9;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 480px) {
+    .header h1 {
+        font-size: 18px;
+    }
+    
+    .status-value {
+        font-size: 24px;
+    }
+    
+    .input-group {
+        flex-direction: column;
+    }
+    
+    .btn-primary {
+        width: 100%;
+    }
+    
+    table {
+        font-size: 11px;
+    }
+    
+    table th,
+    table td {
+        padding: 6px 3px;
+    }
+}
+
