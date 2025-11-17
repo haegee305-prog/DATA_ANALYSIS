@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InBody 데이터 누적건수 예측</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <header class="header">
+            <h1>InBody 데이터 누적건수<br>2억 도달 시각 예측</h1>
+        </header>
+
+        <!-- 현재 상태 -->
+        <section class="status-section">
+            <div class="status-card">
+                <div class="status-label">현재 누적건수</div>
+                <div class="status-value" id="currentCount">로딩 중...</div>
+                <div class="status-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">0%</div>
+                </div>
+                <div class="status-info" id="statusInfo"></div>
+            </div>
+        </section>
+
+        <!-- 예상 도달 시각 -->
+        <section class="prediction-section">
+            <div class="prediction-card">
+                <div class="prediction-label">예상 2억 도달 시각</div>
+                <div class="prediction-value" id="predictedTime">데이터 입력 후 예측 가능</div>
+            </div>
+        </section>
+
+        <!-- 데이터 입력 -->
+        <section class="input-section">
+            <div class="input-card">
+                <h2>데이터 입력</h2>
+                <div class="input-group">
+                    <input type="text" id="countInput" placeholder="누적건수 입력 (예: 199186120)" 
+                           class="input-field" inputmode="numeric">
+                    <button onclick="addData()" class="btn btn-primary">저장</button>
+                </div>
+                <div class="hint-text">예: 199186120 또는 199,186,120</div>
+            </div>
+        </section>
+
+        <!-- 예측 계산 버튼 -->
+        <section class="action-section">
+            <button onclick="calculatePrediction()" class="btn btn-secondary" id="predictBtn">예측 계산</button>
+            <div class="status-message" id="statusMessage"></div>
+        </section>
+
+        <!-- 결과 표시 영역 -->
+        <section class="results-section" id="resultsSection" style="display: none;">
+            <div class="results-card">
+                <h2>분석 결과</h2>
+                
+                <!-- 데이터 테이블 -->
+                <div class="table-container" id="dataTable"></div>
+                
+                <!-- 증가 선형식 -->
+                <div class="info-box" id="linearEquation"></div>
+                
+                <!-- 예측 정보 -->
+                <div class="info-box" id="predictionInfo"></div>
+                
+                <!-- 시간대별 분석 -->
+                <div class="info-box" id="timePeriodStats"></div>
+                
+                <!-- 최종 예측 -->
+                <div class="final-prediction" id="finalPrediction"></div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // 페이지 로드 시 현재 데이터 조회
+        window.addEventListener('DOMContentLoaded', function() {
+            loadCurrentData();
+        });
+
+        // 현재 데이터 로드
+        async function loadCurrentData() {
+            try {
+                const response = await fetch('/api/current');
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (data.has_data) {
+                        document.getElementById('currentCount').textContent = 
+                            data.current_count.toLocaleString();
+                        document.getElementById('progressText').textContent = 
+                            data.progress.toFixed(2) + '%';
+                        document.getElementById('progressFill').style.width = 
+                            data.progress + '%';
+                        document.getElementById('statusInfo').textContent = 
+                            `남은 건수: ${data.remaining.toLocaleString()} | 마지막 업데이트: ${data.last_update}`;
+                    } else {
+                        document.getElementById('currentCount').textContent = '데이터 없음';
+                        document.getElementById('statusInfo').textContent = '데이터를 입력해주세요.';
+                    }
+                }
+            } catch (error) {
+                showMessage('데이터 로드 오류: ' + error.message, 'error');
+            }
+        }
+
+        // 데이터 추가
+        async function addData() {
+            const input = document.getElementById('countInput');
+            const countStr = input.value.trim().replace(/,/g, '').replace(/\s/g, '');
+            
+            if (!countStr) {
+                showMessage('숫자를 입력해주세요.', 'error');
+                return;
+            }
+            
+            const totalCount = parseInt(countStr);
+            
+            if (totalCount <= 0) {
+                showMessage('0보다 큰 숫자를 입력해주세요.', 'error');
+                return;
+            }
+            
+            if (totalCount > 500000000) {
+                showMessage('입력값이 너무 큽니다.', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ count: totalCount })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('데이터가 저장되었습니다.', 'success');
+                    input.value = '';
+                    loadCurrentData();
+                    // 자동으로 예측 계산
+                    setTimeout(() => calculatePrediction(), 500);
+                } else {
+                    if (data.previous_count) {
+                        if (confirm(`입력한 값(${totalCount.toLocaleString()})이 이전 값(${data.previous_count.toLocaleString()})보다 작습니다.\n저장하시겠습니까? (예측 시 무시됨)`)) {
+                            // 강제 저장은 API에서 처리하지 않으므로 여기서는 취소
+                            showMessage('감소하는 데이터는 저장되지 않습니다.', 'error');
+                        }
+                    } else {
+                        showMessage(data.error || '데이터 저장 실패', 'error');
+                    }
+                }
+            } catch (error) {
+                showMessage('데이터 저장 오류: ' + error.message, 'error');
+            }
+        }
+
+        // 예측 계산
+        async function calculatePrediction() {
+            const btn = document.getElementById('predictBtn');
+            btn.disabled = true;
+            btn.textContent = '계산 중...';
+            showMessage('예측 계산 중...', 'info');
+            
+            try {
+                const response = await fetch('/api/predict');
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayResults(data);
+                    document.getElementById('predictedTime').textContent = 
+                        data.predicted_time_linear;
+                    showMessage('예측 계산 완료', 'success');
+                } else {
+                    showMessage(data.error || '예측 계산 실패', 'error');
+                }
+            } catch (error) {
+                showMessage('예측 계산 오류: ' + error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '예측 계산';
+            }
+        }
+
+        // 결과 표시
+        function displayResults(data) {
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.style.display = 'block';
+            
+            // 데이터 테이블
+            let tableHtml = '<h3>입력 데이터 내역 (감소 데이터 제외)</h3><table><thead><tr><th>날짜</th><th>시간</th><th>누적건수</th><th>이전대비증가</th><th>분당증가량</th></tr></thead><tbody>';
+            data.data_table.forEach(row => {
+                tableHtml += `<tr>
+                    <td>${row.날짜}</td>
+                    <td>${row.시간}</td>
+                    <td>${row.누적건수.toLocaleString()}</td>
+                    <td>${row.이전대비증가.toLocaleString()}</td>
+                    <td>${row.분당증가량.toFixed(2)}</td>
+                </tr>`;
+            });
+            tableHtml += '</tbody></table>';
+            if (data.filtered_count > 0) {
+                tableHtml += `<p class="note">※ 참고: 감소하는 데이터 ${data.filtered_count}개가 예측에서 제외되었습니다.</p>`;
+            }
+            document.getElementById('dataTable').innerHTML = tableHtml;
+            
+            // 증가 선형식
+            document.getElementById('linearEquation').innerHTML = `
+                <h3>증가 선형식</h3>
+                <p><strong>선형식:</strong> y = ${data.slope_per_min.toFixed(2)}x + ${data.intercept.toLocaleString()}</p>
+                <p>(x: 첫 데이터 기준 경과 시간(분), y: 누적 건수)</p>
+                <p>분당 증가량(기울기): ${data.slope_per_min.toFixed(2)}</p>
+                <p>y절편: ${data.intercept.toLocaleString()}</p>
+            `;
+            
+            // 예측 정보
+            document.getElementById('predictionInfo').innerHTML = `
+                <h3>예측 정보</h3>
+                <p>현재 누적 건수: ${data.current_count.toLocaleString()}</p>
+                <p>목표: 200,000,000</p>
+                <p>남은 건수: ${data.remaining.toLocaleString()}</p>
+                <p>평균 분당 증가량: ${data.avg_per_min.toFixed(2)}</p>
+                <p>선형식 기반 분당 증가량: ${data.slope_per_min.toFixed(2)}</p>
+                <p><strong>예측 결과 비교:</strong></p>
+                <p>평균 증가율 기반: ${data.predicted_time_avg}</p>
+                <p>선형식 기반: ${data.predicted_time_linear} ⭐</p>
+            `;
+            
+            // 시간대별 분석
+            let timeStatsHtml = '';
+            if (Object.keys(data.time_period_stats).length > 0) {
+                timeStatsHtml += '<h3>시간대별 증가율 분석</h3>';
+                for (const [period, stats] of Object.entries(data.time_period_stats)) {
+                    timeStatsHtml += `
+                        <div class="time-period">
+                            <strong>${period} (00:00-11:59 / 12:00-23:59):</strong>
+                            <p>평균 분당 증가량: ${stats.평균.toFixed(2)}</p>
+                            <p>데이터 수: ${stats.데이터수}개</p>
+                            <p>최소: ${stats.최소.toFixed(2)} / 최대: ${stats.최대.toFixed(2)}</p>
+                        </div>
+                    `;
+                }
+            }
+            
+            if (Object.keys(data.detailed_stats).length > 0) {
+                timeStatsHtml += '<h3>세부 시간대별 증가율 분석</h3>';
+                const periodOrder = ["새벽(0-5시)", "오전(6-11시)", "오후(12-17시)", "저녁(18-23시)"];
+                periodOrder.forEach(period => {
+                    if (data.detailed_stats[period]) {
+                        const stats = data.detailed_stats[period];
+                        timeStatsHtml += `
+                            <div class="time-period">
+                                <strong>${period}:</strong>
+                                <p>평균 분당 증가량: ${stats.평균.toFixed(2)}</p>
+                                <p>데이터 수: ${stats.데이터수}개</p>
+                                <p>최소: ${stats.최소.toFixed(2)} / 최대: ${stats.최대.toFixed(2)}</p>
+                            </div>
+                        `;
+                    }
+                });
+            }
+            document.getElementById('timePeriodStats').innerHTML = timeStatsHtml;
+            
+            // 최종 예측
+            document.getElementById('finalPrediction').innerHTML = `
+                <div class="final-prediction-content">
+                    <h2>✨ 예상 2억 도달 시각 (선형식) ✨</h2>
+                    <div class="final-time">${data.predicted_time_linear}</div>
+                    <div class="final-days">예상 소요 시간: 약 ${data.days_remaining}일</div>
+                </div>
+            `;
+            
+            // 스크롤 이동
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 메시지 표시
+        function showMessage(message, type) {
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message ' + type;
+            setTimeout(() => {
+                statusMessage.textContent = '';
+                statusMessage.className = 'status-message';
+            }, 3000);
+        }
+
+        // Enter 키로 데이터 입력
+        document.getElementById('countInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addData();
+            }
+        });
+    </script>
+</body>
+</html>
+
